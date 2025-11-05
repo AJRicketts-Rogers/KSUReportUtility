@@ -71,6 +71,7 @@ rogers\utility\app\service\osmws\wsdl\AttachmentResponseType.class
 rogers\utility\app\service\osmws\wsdl\CreateRemarkType.class
 rogers\utility\app\utility\GeneratePOJOFromXml.class
 rogers\utility\app\service\osmws\wsdl\OrderDataDeltaType$Delete.class
+rogers\utility\app\ksu\repo\SOMRepository.class
 rogers\utility\app\service\osmws\wsdl\CancelOrderResponseType.class
 rogers\utility\app\service\osmws\wsdl\OrderTransactionNotAllowedFaultType.class
 rogers\utility\app\service\osmws\wsdl\ResolveFailureRequestType.class
@@ -133,6 +134,7 @@ rogers\utility\app\service\osmws\wsdl\FindOrderRequestType.class
 rogers\utility\app\ksu\repo\ConfigRepository.class
 rogers\utility\app\service\osmws\wsdl\RemarkType.class
 rogers\utility\app\service\osmws\wsdl\ObjectFactory.class
+rogers\utility\app\ksu\entity\SomEntity.class
 rogers\utility\app\service\osmws\wsdl\OrderKeyType.class
 rogers\utility\app\service\osmws\wsdl\DataChangeRequestType.class
 rogers\utility\app\osm\repo\OSMRepository.class

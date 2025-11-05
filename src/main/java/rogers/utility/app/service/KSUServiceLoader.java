@@ -5,6 +5,7 @@ import java.sql.Timestamp;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
@@ -17,10 +18,13 @@ import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import rogers.utility.app.ksu.entity.ConfigEntity;
+import rogers.utility.app.ksu.entity.KsuEntity;
 import rogers.utility.app.ksu.entity.OSMOrderTrackerEntity;
+import rogers.utility.app.ksu.entity.SomEntity;
 import rogers.utility.app.ksu.repo.ConfigRepository;
 import rogers.utility.app.ksu.repo.KSUOSMRecordRepository;
 import rogers.utility.app.ksu.repo.KSURepository;
+import rogers.utility.app.ksu.repo.SOMRepository;
 import rogers.utility.app.model.FilterConfig;
 import rogers.utility.app.osm.entity.OsmOrderEntity;
 import rogers.utility.app.osm.repo.OSMRepository;
@@ -34,6 +38,9 @@ public class KSUServiceLoader {
 
 	@Autowired
 	private KSURepository ksuRepo;
+	
+	@Autowired 
+	private SOMRepository somRepo;
 
 	@Autowired
 	private KSUOSMRecordRepository ksuOsmRepo;
@@ -72,7 +79,7 @@ public class KSUServiceLoader {
 		
 		Calendar yesterday = Calendar.getInstance();
 		Calendar tomrrow = Calendar.getInstance();
-		yesterday.add(Calendar.DATE, -1);
+		yesterday.add(Calendar.DATE, -40);
 		tomrrow.add(Calendar.DATE, 1);
 		Calendar startC = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss").getCalendar();
 		startC.setTimeInMillis(yesterday.getTimeInMillis());
@@ -83,28 +90,24 @@ public class KSUServiceLoader {
 		List<OsmOrderEntity> osmList = null;
 		logger.info("Reading OSM  DB ..." + startC.getTime() + "----" + endC.getTime());
 		osmList = osmRepo.findAllCompletedByDateBetween(startC.getTime(), endC.getTime());
-		logger.info(osmList);
 	
-		int counter=osmList.size();
-		logger.warn("Querying Completed Orders " +counter );
+		int counter = osmList.size();
+		logger.warn("Querying " + counter + " Completed Orders");
 		int tempCount=0;
 		
-		for (OsmOrderEntity osmEntity : osmList) {
-			logger.debug("loading OSM Order "+ osmEntity.getORDER_SEQ_ID());
+		// Filter out all ZAP orders
+		List<OsmOrderEntity> osmListFiltered = filterZapOrders(osmList);
+		
+		for (OsmOrderEntity osmEntity : osmListFiltered) {
+			logger.debug("loading OSM Order " + osmEntity.getORDER_SEQ_ID());
 			OSMOrderTrackerEntity okEntity = createKSUOSMBean(osmEntity);
 			if (osmEntity.getAmendMent() == null) {
 				try {
 				// System.out.println("loading OSM ID " + okEntity.getOsmId());
 				int count = ksuOsmRepo.countByOsmId(okEntity.getOsmId());
-				String entityStatus = okEntity.getStatus();
-				
-				if (entityStatus.equals("EMPTYXML")) {
-					logger.info("Order " + okEntity.getOsmId() + " is a Zap order, continuing.");
-					continue;
-				}
 				
 				if (count == 0) {
-					logger.info("Saving order " + okEntity.getOsmId() + "To db.");
+//					logger.info("Saving order " + okEntity.getOsmId() + " to db.");
 					ksuOsmRepo.save(okEntity);
 					tempCount++;
 				}
@@ -147,6 +150,44 @@ public class KSUServiceLoader {
 		entity.setLastUpdatedDate(new Timestamp(System.currentTimeMillis()));
 
 		return entity;
+	}
+	
+	private List<OsmOrderEntity> filterZapOrders(List<OsmOrderEntity> osmList) {
+		List<OsmOrderEntity> returnList = new ArrayList<>();
+		logger.info("Finding som entities by order id");
+		
+		for (OsmOrderEntity osmEntity : osmList) {
+			Integer orderId = osmEntity.getORDER_SEQ_ID();
+			List<SomEntity> somEntities = somRepo.findSomEntitiesByOSM_ORDER_ID(String.valueOf(orderId));
+			
+			if (somEntities.size() != 0) {
+				String orderType = somEntities.get(0).getORDER_TYPE();
+				logger.info("Pulled order type for order " + orderId + ". Order type = " + orderType);
+				if (orderType != null && orderType.toLowerCase().contains("zap")) {
+					continue;
+				}
+				else {
+					logger.info("Not a zap order, including in returnList");
+					returnList.add(osmEntity);
+				}
+			}
+			else {
+				if (osmEntity.getAmendMent() != null) {
+					logger.info("Order " + orderId + " is an amend order, somEntities list is empty = " + somEntities);
+				}
+				else {
+					logger.info("somEntities List is empty for order " + orderId + " = " + somEntities);					
+				}
+			}
+		}
+		
+		if (returnList.size() != 0) {
+			logger.info("Returning list of filtered orders = " + returnList);
+			return returnList;
+		}
+		else {
+			return null;
+		}
 	}
 
 	public void setConfig(String url1, String url2, String user2, String password2) {

@@ -3,6 +3,7 @@ package rogers.utility.app;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.sql.Timestamp;
+import java.time.LocalDateTime;
 import java.util.Optional;
 import java.util.Properties;
 
@@ -28,8 +29,9 @@ import rogers.utility.app.utility.ReloadablePropertySourceFactory;
 public class OSMKSULoaderMainApp implements CommandLineRunner {
 	private static final Logger logger = LogManager.getLogger(OSMKSULoaderMainApp.class);
 	public static String entryArg = "LOADOSMONLY";// "LOADOSMDATA"
+	
 
-	public static void main(String[] args) {
+	public static void main(String[] args) {		
 		entryArg = args[0];
 		Properties properties = null;
 		try {
@@ -37,7 +39,7 @@ public class OSMKSULoaderMainApp implements CommandLineRunner {
 		} catch (Exception e) {
 			logger.error("Exception in OSMKSULoaderMainApp::main",e);
 		}
-
+		
 		SpringApplication application = new SpringApplication(OSMKSULoaderMainApp.class);
 		application.run(args);
 		
@@ -54,10 +56,13 @@ public class OSMKSULoaderMainApp implements CommandLineRunner {
 	
 	@Value("${osm.ws.url}")
 	private String url;
+	
 	@Value("${osm.ws.url.secondary}")
 	private String urlSecondary;
+	
 	@Value("${osm.ws.user}")
 	private String user;
+	
 	@Value("${osm.ws.password}")
 	private String password;
 
@@ -70,7 +75,7 @@ public class OSMKSULoaderMainApp implements CommandLineRunner {
 
 	@Override
 	public void run(String... args) throws Exception {
-	
+		
 		try {
 			this.password = CryptoUtils.decrypt(this.password);
 		//	System.out.println("this.password " + this.password);
@@ -78,7 +83,7 @@ public class OSMKSULoaderMainApp implements CommandLineRunner {
 			logger.error("Exception in OSMKSULoaderMainApp::run",e);
 		}
 
-		
+//		logger.info("osm.ws.user = " + user + ", osm.ws.url = " + url + ", osm.ws.url.secondary = " + urlSecondary);
 
 		if (entryArg.equalsIgnoreCase("LOADOSMONLY")) {
 			logger.info("OSM Order  Loading Started.....");
@@ -126,8 +131,13 @@ public class OSMKSULoaderMainApp implements CommandLineRunner {
 					config.setLocked("OPEN");
 					}
 				configRepo.saveAndFlush(config);
-				logger.info("OSM Order  Loading Completed!");
+				logger.info("OSM Order Loading Completed!");
 			}
+			
+	        logger.info("\n\n\n");
+	        logger.info("========================================");
+	        logger.info("====     NEXT APPLICATION START     ====");
+	        logger.info("========================================");
 
 		} else {
 			logger.info("OSM Order  Updating Started.....");
