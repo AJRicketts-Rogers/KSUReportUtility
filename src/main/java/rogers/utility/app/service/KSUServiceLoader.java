@@ -79,7 +79,7 @@ public class KSUServiceLoader {
 		
 		Calendar yesterday = Calendar.getInstance();
 		Calendar tomrrow = Calendar.getInstance();
-		yesterday.add(Calendar.DATE, -1);
+		yesterday.add(Calendar.DATE, -30);
 		tomrrow.add(Calendar.DATE, 1);
 		Calendar startC = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss").getCalendar();
 		startC.setTimeInMillis(yesterday.getTimeInMillis());
@@ -93,15 +93,12 @@ public class KSUServiceLoader {
 	
 		int counter = osmList.size();
 		logger.warn("Querying " + counter + " Completed Orders");
-		int tempCount=0;
+		int tempCount = 0;
 		
-		// Filter out all ZAP orders
-		List<OsmOrderEntity> osmListFiltered = filterZapOrders(osmList);
-		
-		for (OsmOrderEntity osmEntity : osmListFiltered) {
+		for (OsmOrderEntity osmEntity : osmList) {
 			logger.debug("loading OSM Order " + osmEntity.getORDER_SEQ_ID());
 			OSMOrderTrackerEntity okEntity = createKSUOSMBean(osmEntity);
-			if (osmEntity.getAmendMent() == null) {
+			if (osmEntity.getAmendMent() == null && !isZapOrder(osmEntity)) {
 				try {
 				// System.out.println("loading OSM ID " + okEntity.getOsmId());
 				int count = ksuOsmRepo.countByOsmId(okEntity.getOsmId());
@@ -152,42 +149,25 @@ public class KSUServiceLoader {
 		return entity;
 	}
 	
-	private List<OsmOrderEntity> filterZapOrders(List<OsmOrderEntity> osmList) {
-		List<OsmOrderEntity> returnList = new ArrayList<>();
-		logger.info("Finding som entities by order id");
+	private boolean isZapOrder(OsmOrderEntity osmEntity) {
+//		logger.info("Finding som entities by order id");
 		
-		for (OsmOrderEntity osmEntity : osmList) {
-			Integer orderId = osmEntity.getORDER_SEQ_ID();
-			List<SomEntity> somEntities = somRepo.findSomEntitiesByOSM_ORDER_ID(String.valueOf(orderId));
+		Integer orderId = osmEntity.getORDER_SEQ_ID();
+		List<SomEntity> somEntities = somRepo.findSomEntitiesByOSM_ORDER_ID(String.valueOf(orderId));
+		
+		if (somEntities.size() != 0) {
 			
-			if (somEntities.size() != 0) {
-				String orderType = somEntities.get(0).getORDER_TYPE();
-				logger.info("Pulled order type for order " + orderId + ". Order type = " + orderType);
-				if (orderType != null && orderType.toLowerCase().contains("zap")) {
-					continue;
-				}
-				else {
-					logger.info("Not a zap order, including in returnList");
-					returnList.add(osmEntity);
-				}
-			}
-			else {
-				if (osmEntity.getAmendMent() != null) {
-					logger.info("Order " + orderId + " is an amend order, somEntities list is empty = " + somEntities);
-				}
-				else {
-					logger.info("somEntities List is empty for order " + orderId + " = " + somEntities);					
-				}
+			String orderType = somEntities.get(0).getORDER_TYPE();
+			logger.info("Pulled order type for order " + orderId + ". Order type = " + orderType);
+			
+			if (orderType == null || !orderType.toLowerCase().contains("zap")) {
+				logger.info("Not a zap order, including");
+				return false;
 			}
 		}
 		
-		if (returnList.size() != 0) {
-			logger.info("Returning list of filtered orders = " + returnList);
-			return returnList;
-		}
-		else {
-			return null;
-		}
+		return true;
+		
 	}
 
 	public void setConfig(String url1, String url2, String user2, String password2) {
