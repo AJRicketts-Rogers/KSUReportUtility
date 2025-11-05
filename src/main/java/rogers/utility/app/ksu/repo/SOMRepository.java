@@ -8,11 +8,13 @@ import org.springframework.stereotype.Repository;
 import rogers.utility.app.ksu.entity.SomEntity;
 
 import java.util.List;
+import java.util.Optional;
 
 
 @Repository
 public interface SOMRepository extends JpaRepository<SomEntity, Integer> {
 
-    @Query(value = "SELECT u FROM SomEntity u WHERE u.OSM_ORDER_ID = :osmId")
-    List<SomEntity> findSomEntitiesByOSM_ORDER_ID(@Param("osmId") String osmId);
+	@Query(value = "SELECT ORDER_TYPE FROM om_message_som_log WHERE OSM_ORDER_ID = :osmId FETCH FIRST 1 ROWS ONLY", nativeQuery = true)
+	Optional<String> findOrderTypeByOSM_ORDER_ID(@Param("osmId") String osmId);
+
 }

@@ -9,6 +9,7 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
+import java.util.Optional;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -79,7 +80,7 @@ public class KSUServiceLoader {
 		
 		Calendar yesterday = Calendar.getInstance();
 		Calendar tomrrow = Calendar.getInstance();
-		yesterday.add(Calendar.DATE, -30);
+		yesterday.add(Calendar.DATE, -1);
 		tomrrow.add(Calendar.DATE, 1);
 		Calendar startC = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss").getCalendar();
 		startC.setTimeInMillis(yesterday.getTimeInMillis());
@@ -153,18 +154,23 @@ public class KSUServiceLoader {
 //		logger.info("Finding som entities by order id");
 		
 		Integer orderId = osmEntity.getORDER_SEQ_ID();
-		List<SomEntity> somEntities = somRepo.findSomEntitiesByOSM_ORDER_ID(String.valueOf(orderId));
+		Optional<String> orderTypeOpt = somRepo.findOrderTypeByOSM_ORDER_ID(String.valueOf(orderId));
+		String orderType = null;
 		
-		if (somEntities.size() != 0) {
+		if (orderTypeOpt.isPresent()) {
 			
-			String orderType = somEntities.get(0).getORDER_TYPE();
+			orderType = orderTypeOpt.get();
 			logger.info("Pulled order type for order " + orderId + ". Order type = " + orderType);
-			
-			if (orderType == null || !orderType.toLowerCase().contains("zap")) {
+			if (!orderType.toLowerCase().contains("zap")) {
 				logger.info("Not a zap order, including");
 				return false;
 			}
 		}
+		else {
+			logger.info("Order type for order " + orderId + " is null, including");
+			return false;
+		}
+			
 		
 		return true;
 		
