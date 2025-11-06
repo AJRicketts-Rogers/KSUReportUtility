@@ -87,7 +87,7 @@ public class KSUServiceLoader {
 		
 		Calendar yesterday = Calendar.getInstance();
 		Calendar tomrrow = Calendar.getInstance();
-		yesterday.add(Calendar.DATE, -50);
+		yesterday.add(Calendar.DATE, -1);
 		tomrrow.add(Calendar.DATE, 1);
 		Calendar startC = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss").getCalendar();
 		startC.setTimeInMillis(yesterday.getTimeInMillis());
@@ -197,15 +197,15 @@ public class KSUServiceLoader {
 	                Function.identity()
 	            ));
 	        
-	        logger.info("batchEntityMap = " + batchEntityMap);
+//	        logger.info("batchEntityMap = " + batchEntityMap);
 
 	        // Extract order IDs for the SOM query
 	        List<String> osmOrderIdsList = new ArrayList<>(batchEntityMap.keySet());
-	        logger.info("osmOrderIdsList = " + osmOrderIdsList);
+//	        logger.info("osmOrderIdsList = " + osmOrderIdsList);
 
 	        // Query SOM for order types
 	        List<Object[]> batchResults = somRepo.findOrderTypesByOSM_ORDER_IDs(osmOrderIdsList);
-	        logger.info("batchResults = " + batchResults);
+//	        logger.info("batchResults = " + batchResults);
 
 	        for (Object[] row : batchResults) {
 				
@@ -235,7 +235,7 @@ public class KSUServiceLoader {
 	        }
 	    }
 
-	    logger.info("filteredEntities = " + filteredEntities);
+//	    logger.info("filteredEntities = " + filteredEntities);
 	    return filteredEntities;
 	}
 
