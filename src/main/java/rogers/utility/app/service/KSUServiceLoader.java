@@ -8,8 +8,12 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -34,6 +38,8 @@ import rogers.utility.app.utility.GeneratePOJOFromXml;
 @Service
 public class KSUServiceLoader {
 	private static final Logger logger = LogManager.getLogger(KSUServiceLoader.class);
+	private static final int BATCH_SIZE = 1000;
+	
 	@Autowired
 	private OSMRepository osmRepo;
 
@@ -55,6 +61,7 @@ public class KSUServiceLoader {
 	private String urlSecondary;
 	private String user;
 	private String password;
+	
 
 	public KSUServiceLoader() {
 		logger.info("Loading KSUServiceLoader");
@@ -80,7 +87,7 @@ public class KSUServiceLoader {
 		
 		Calendar yesterday = Calendar.getInstance();
 		Calendar tomrrow = Calendar.getInstance();
-		yesterday.add(Calendar.DATE, -1);
+		yesterday.add(Calendar.DATE, -50);
 		tomrrow.add(Calendar.DATE, 1);
 		Calendar startC = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss").getCalendar();
 		startC.setTimeInMillis(yesterday.getTimeInMillis());
@@ -95,34 +102,29 @@ public class KSUServiceLoader {
 		int counter = osmList.size();
 		logger.warn("Querying " + counter + " Completed Orders");
 		int tempCount = 0;
-		
-		for (OsmOrderEntity osmEntity : osmList) {
+	
+		logger.info("Filtering Zap and Amend Orders");
+		List<OsmOrderEntity> osmListNoZapOrAmend = filterOrders(osmList);
+		for (OsmOrderEntity osmEntity : osmListNoZapOrAmend) {
 			logger.debug("loading OSM Order " + osmEntity.getORDER_SEQ_ID());
 			OSMOrderTrackerEntity okEntity = createKSUOSMBean(osmEntity);
-			if (osmEntity.getAmendMent() == null && !isZapOrder(osmEntity)) {
-				try {
-				// System.out.println("loading OSM ID " + okEntity.getOsmId());
+			try {
 				int count = ksuOsmRepo.countByOsmId(okEntity.getOsmId());
-				
+			
 				if (count == 0) {
-//					logger.info("Saving order " + okEntity.getOsmId() + " to db.");
 					ksuOsmRepo.save(okEntity);
 					tempCount++;
 				}
-				// else
-				// System.out.println("Duplicate OSM ID " + okEntity.getOsmId());
-				} catch (Exception e) {
-					logger.error("Exception in Saving ", e);
-				}
-			} 
-			
-			else {
-				logger.debug("This is an Amend Order  >> " + osmEntity.getORDER_SEQ_ID());
+//				else {
+//					logger.info("Duplicate OSM ID " + okEntity.getOsmId());					
+//				}
+			} catch (Exception e) {
+				logger.error("Exception in Saving ", e);
 			}
 			
-			if(tempCount >= 500) {
+			if (tempCount >= 500) {
 				ksuOsmRepo.flush();
-				tempCount=0;
+				tempCount = 0;
 			}
 		}
 		
@@ -134,6 +136,38 @@ public class KSUServiceLoader {
 		config2.setLocked("OPEN");
 		
 		logger.info("Config Saved.." + config2);
+		
+		
+		
+//		for (OsmOrderEntity osmEntity : osmList) {
+//			logger.debug("loading OSM Order " + osmEntity.getORDER_SEQ_ID());
+//			OSMOrderTrackerEntity okEntity = createKSUOSMBean(osmEntity);
+//			if (osmEntity.getAmendMent() && !isZapOrder(osmEntity)) {
+//				try {
+//				// System.out.println("loading OSM ID " + okEntity.getOsmId());
+//				int count = ksuOsmRepo.countByOsmId(okEntity.getOsmId());
+//				
+//				if (count == 0) {
+////					logger.info("Saving order " + okEntity.getOsmId() + " to db.");
+//					ksuOsmRepo.save(okEntity);
+//					tempCount++;
+//				}
+//				// else
+//				// System.out.println("Duplicate OSM ID " + okEntity.getOsmId());
+//				} catch (Exception e) {
+//					logger.error("Exception in Saving ", e);
+//				}
+//			} 
+//			
+//			else {
+//				logger.debug("This is an Amend Order  >> " + osmEntity.getORDER_SEQ_ID());
+//			}
+//			
+//			if(tempCount >= 500) {
+//				ksuOsmRepo.flush();
+//				tempCount=0;
+//			}
+//		}
 	}
 	private OSMOrderTrackerEntity createKSUOSMBean(OsmOrderEntity osmEntity) {
 
@@ -150,31 +184,61 @@ public class KSUServiceLoader {
 		return entity;
 	}
 	
-	private boolean isZapOrder(OsmOrderEntity osmEntity) {
-//		logger.info("Finding som entities by order id");
-		
-		Integer orderId = osmEntity.getORDER_SEQ_ID();
-		Optional<String> orderTypeOpt = somRepo.findOrderTypeByOSM_ORDER_ID(String.valueOf(orderId));
-		String orderType = null;
-		
-		if (orderTypeOpt.isPresent()) {
-			
-			orderType = orderTypeOpt.get();
-			logger.info("Pulled order type for order " + orderId + ". Order type = " + orderType);
-			if (!orderType.toLowerCase().contains("zap")) {
-				logger.info("Not a zap order, including");
-				return false;
-			}
-		}
-		else {
-			logger.info("Order type for order " + orderId + " is null, including");
-			return false;
-		}
-			
-		
-		return true;
-		
+	private List<OsmOrderEntity> filterOrders(List<OsmOrderEntity> osmEntityList) {
+	    List<OsmOrderEntity> filteredEntities = new ArrayList<>();
+
+	    for (int i = 0; i < osmEntityList.size(); i += BATCH_SIZE) {
+	        List<OsmOrderEntity> batch = osmEntityList.subList(i, Math.min(i + BATCH_SIZE, osmEntityList.size()));
+
+	        // Map ORDER_SEQ_ID to OsmOrderEntity for quick lookup
+	        Map<String, OsmOrderEntity> batchEntityMap = batch.stream()
+	            .collect(Collectors.toMap(
+	                entity -> entity.getORDER_SEQ_ID().toString(),
+	                Function.identity()
+	            ));
+	        
+	        logger.info("batchEntityMap = " + batchEntityMap);
+
+	        // Extract order IDs for the SOM query
+	        List<String> osmOrderIdsList = new ArrayList<>(batchEntityMap.keySet());
+	        logger.info("osmOrderIdsList = " + osmOrderIdsList);
+
+	        // Query SOM for order types
+	        List<Object[]> batchResults = somRepo.findOrderTypesByOSM_ORDER_IDs(osmOrderIdsList);
+	        logger.info("batchResults = " + batchResults);
+
+	        for (Object[] row : batchResults) {
+				
+				Object osmOrderIdObj = row[0];
+				if (osmOrderIdObj == null) {
+				    logger.warn("Skipping row with null OSM_ORDER_ID");
+				    continue;
+				}
+				String osmOrderId = osmOrderIdObj.toString();
+
+	            Object orderTypeObj = row[1];
+	            String orderType = orderTypeObj != null ? orderTypeObj.toString() : null;
+
+	            if (orderType != null && orderType.toLowerCase().contains("zap")) {
+	                logger.info("Order " + osmOrderId + " is a zap order, continuing...");
+	                continue;
+	            }
+
+	            // Add to result list only if not a zap order or an amend order
+	            OsmOrderEntity entity = batchEntityMap.get(osmOrderId);
+	            if (entity != null && entity.getAmendMent() == null) {
+	            	filteredEntities.add(entity);
+	            }
+	            else {
+	            	logger.info("Order " + osmOrderId + " is an Amend Order");
+	            }
+	        }
+	    }
+
+	    logger.info("filteredEntities = " + filteredEntities);
+	    return filteredEntities;
 	}
+
 
 	public void setConfig(String url1, String url2, String user2, String password2) {
 		this.url = url1;
