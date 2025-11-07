@@ -29,12 +29,14 @@ C:\Users\Aj.Ricketts\Documents\Git_Repos\osm_1025\NGPP_OSM_0659\NGPP\OSM\service
 C:\Users\Aj.Ricketts\Documents\Git_Repos\osm_1025\NGPP_OSM_0659\NGPP\OSM\services\KSUReportUtility\src\main\java\rogers\utility\app\service\osmws\wsdl\InvalidOrderDataFaultType.java
 C:\Users\Aj.Ricketts\Documents\Git_Repos\osm_1025\NGPP_OSM_0659\NGPP\OSM\services\KSUReportUtility\src\main\java\rogers\utility\app\model\RequestBean.java
 C:\Users\Aj.Ricketts\Documents\Git_Repos\osm_1025\NGPP_OSM_0659\NGPP\OSM\services\KSUReportUtility\src\main\java\rogers\utility\app\service\osmws\wsdl\ResolveFailureRequestType.java
+C:\Users\Aj.Ricketts\Documents\Git_Repos\osm_1025\NGPP_OSM_0659\NGPP\OSM\services\KSUReportUtility\src\main\java\rogers\utility\app\ksu\entity\SomEntity.java
 C:\Users\Aj.Ricketts\Documents\Git_Repos\osm_1025\NGPP_OSM_0659\NGPP\OSM\services\KSUReportUtility\src\main\java\rogers\utility\app\service\osmws\wsdl\GracePeriodTransitionType.java
 C:\Users\Aj.Ricketts\Documents\Git_Repos\osm_1025\NGPP_OSM_0659\NGPP\OSM\services\KSUReportUtility\src\main\java\rogers\utility\app\model\Config.java
 C:\Users\Aj.Ricketts\Documents\Git_Repos\osm_1025\NGPP_OSM_0659\NGPP\OSM\services\KSUReportUtility\src\main\java\rogers\utility\app\ksu\entity\ConfigEntity.java
 C:\Users\Aj.Ricketts\Documents\Git_Repos\osm_1025\NGPP_OSM_0659\NGPP\OSM\services\KSUReportUtility\src\main\java\rogers\utility\app\service\osmws\wsdl\AmendmentFilterLevelOfDetailType.java
 C:\Users\Aj.Ricketts\Documents\Git_Repos\osm_1025\NGPP_OSM_0659\NGPP\OSM\services\KSUReportUtility\src\main\java\rogers\utility\app\service\osmws\wsdl\CreateOrderBySpecificationResponseType.java
 C:\Users\Aj.Ricketts\Documents\Git_Repos\osm_1025\NGPP_OSM_0659\NGPP\OSM\services\KSUReportUtility\src\main\java\rogers\utility\app\OSMKSULoaderMainApp.java
+C:\Users\Aj.Ricketts\Documents\Git_Repos\osm_1025\NGPP_OSM_0659\NGPP\OSM\services\KSUReportUtility\src\main\java\rogers\utility\app\ksu\repo\SOMRepository.java
 C:\Users\Aj.Ricketts\Documents\Git_Repos\osm_1025\NGPP_OSM_0659\NGPP\OSM\services\KSUReportUtility\src\main\java\rogers\utility\app\service\osmws\wsdl\RemarkFilter.java
 C:\Users\Aj.Ricketts\Documents\Git_Repos\osm_1025\NGPP_OSM_0659\NGPP\OSM\services\KSUReportUtility\src\main\java\rogers\utility\app\service\osmws\wsdl\CreateOrderResponseType.java
 C:\Users\Aj.Ricketts\Documents\Git_Repos\osm_1025\NGPP_OSM_0659\NGPP\OSM\services\KSUReportUtility\src\main\java\rogers\utility\app\service\osmws\wsdl\OrderLifecycleEventType.java
@@ -52,7 +54,6 @@ C:\Users\Aj.Ricketts\Documents\Git_Repos\osm_1025\NGPP_OSM_0659\NGPP\OSM\service
 C:\Users\Aj.Ricketts\Documents\Git_Repos\osm_1025\NGPP_OSM_0659\NGPP\OSM\services\KSUReportUtility\src\main\java\rogers\utility\app\model\OrderItem.java
 C:\Users\Aj.Ricketts\Documents\Git_Repos\osm_1025\NGPP_OSM_0659\NGPP\OSM\services\KSUReportUtility\src\main\java\rogers\utility\app\service\osmws\wsdl\AmendmentSummaryType.java
 C:\Users\Aj.Ricketts\Documents\Git_Repos\osm_1025\NGPP_OSM_0659\NGPP\OSM\services\KSUReportUtility\src\main\java\rogers\utility\app\service\osmws\wsdl\OrderSummaryType.java
-C:\Users\Aj.Ricketts\Documents\Git_Repos\osm_1025\NGPP_OSM_0659\NGPP\OSM\services\KSUReportUtility\src\main\java\rogers\utility\app\osm\entity\SomEntity.java
 C:\Users\Aj.Ricketts\Documents\Git_Repos\osm_1025\NGPP_OSM_0659\NGPP\OSM\services\KSUReportUtility\src\main\java\rogers\utility\app\service\osmws\wsdl\CancelOrderResponseType.java
 C:\Users\Aj.Ricketts\Documents\Git_Repos\osm_1025\NGPP_OSM_0659\NGPP\OSM\services\KSUReportUtility\src\main\java\rogers\utility\app\model\KsuBean.java
 C:\Users\Aj.Ricketts\Documents\Git_Repos\osm_1025\NGPP_OSM_0659\NGPP\OSM\services\KSUReportUtility\src\main\java\rogers\utility\app\osm\entity\OsmEntity.java
@@ -71,7 +72,6 @@ C:\Users\Aj.Ricketts\Documents\Git_Repos\osm_1025\NGPP_OSM_0659\NGPP\OSM\service
 C:\Users\Aj.Ricketts\Documents\Git_Repos\osm_1025\NGPP_OSM_0659\NGPP\OSM\services\KSUReportUtility\src\main\java\rogers\utility\app\utility\CryptoUtils.java
 C:\Users\Aj.Ricketts\Documents\Git_Repos\osm_1025\NGPP_OSM_0659\NGPP\OSM\services\KSUReportUtility\src\main\java\rogers\utility\app\service\osmws\wsdl\RetryOrderRequestType.java
 C:\Users\Aj.Ricketts\Documents\Git_Repos\osm_1025\NGPP_OSM_0659\NGPP\OSM\services\KSUReportUtility\src\main\java\rogers\utility\app\osm\entity\DataDictionaryEntity.java
-C:\Users\Aj.Ricketts\Documents\Git_Repos\osm_1025\NGPP_OSM_0659\NGPP\OSM\services\KSUReportUtility\src\main\java\rogers\utility\app\osm\repo\SOMRepository.java
 C:\Users\Aj.Ricketts\Documents\Git_Repos\osm_1025\NGPP_OSM_0659\NGPP\OSM\services\KSUReportUtility\src\main\java\rogers\utility\app\model\FilterConfig.java
 C:\Users\Aj.Ricketts\Documents\Git_Repos\osm_1025\NGPP_OSM_0659\NGPP\OSM\services\KSUReportUtility\src\main\java\rogers\utility\app\ksu\entity\KsuEntity.java
 C:\Users\Aj.Ricketts\Documents\Git_Repos\osm_1025\NGPP_OSM_0659\NGPP\OSM\services\KSUReportUtility\src\main\java\rogers\utility\app\service\osmws\wsdl\OrderNotFoundFaultType.java

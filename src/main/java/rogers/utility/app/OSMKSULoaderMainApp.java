@@ -76,6 +76,8 @@ public class OSMKSULoaderMainApp implements CommandLineRunner {
 	@Override
 	public void run(String... args) throws Exception {
 		
+		long startTime = System.currentTimeMillis();
+		
 		try {
 			this.password = CryptoUtils.decrypt(this.password);
 		//	System.out.println("this.password " + this.password);
@@ -86,7 +88,7 @@ public class OSMKSULoaderMainApp implements CommandLineRunner {
 //		logger.info("osm.ws.user = " + user + ", osm.ws.url = " + url + ", osm.ws.url.secondary = " + urlSecondary);
 
 		if (entryArg.equalsIgnoreCase("LOADOSMONLY")) {
-			logger.info("OSM Order  Loading Started.....");
+			logger.info("OSM Order Loading Started.....");
 			ksuServiceLoader.setConfig(this.url,this.urlSecondary, this.user, this.password);
 			Optional<ConfigEntity> configs = configRepo.findByName("OSMORDERLOADER");
 
@@ -111,7 +113,7 @@ public class OSMKSULoaderMainApp implements CommandLineRunner {
 					if (config.getLocked() == null || !config.getLocked().equalsIgnoreCase("LOCKED"))
 						config.setLocked("LOCKED");
 					else {
-						logger.warn("Alerdy  Running Process,  Check DB and Java Process");
+						logger.warn("Already Running Process, Check DB and Java Process");
 						return;
 					}
 				}
@@ -133,19 +135,20 @@ public class OSMKSULoaderMainApp implements CommandLineRunner {
 				configRepo.saveAndFlush(config);
 				logger.info("OSM Order Loading Completed!");
 			}
-			
-	        logger.info("\n\n\n");
-	        logger.info("========================================");
-	        logger.info("====     NEXT APPLICATION START     ====");
-	        logger.info("========================================");
+		
 
-		} else {
-			logger.info("OSM Order  Updating Started.....");
+		} 
+		
+		else {
+			
+			logger.info("OSM Order Updating Started.....");
 			ksuServiceUpdater.setConfig(this.url,this.urlSecondary, this.user, this.password);
 			Optional<ConfigEntity> configs = configRepo.findByName("OSMORDEREXECUTER");
 			ConfigEntity config = null;
+			
 			if (configs.isPresent())
 				config = configs.get();
+			
 			logger.info("Config  " + config);
 			if (config == null) {
 				logger.info("Create New Config  " + config);
@@ -161,12 +164,28 @@ public class OSMKSULoaderMainApp implements CommandLineRunner {
 				
 				ksuServiceUpdater.loadFilterConfig(filterConfigFile);
 				ksuServiceUpdater.queryKSUOSMAndUpate(config);
-				logger.info("OSM Order  Updated!");
+				logger.info("OSM Order Updated!");
 			} catch (Exception e) {
 				logger.error("App Exception ! Exceution Halted " ,e);
 			}
 			
 		}
+
+        long endTime = System.currentTimeMillis();
+        long durationMillis = endTime - startTime;
+
+        long seconds = (durationMillis / 1000) % 60;
+        long minutes = (durationMillis / 1000) / 60;
+
+        logger.info("Program ran for " + minutes + " minutes and " + seconds + " seconds.");
+
+		
+        logger.info("\n\n\n");
+        logger.info("========================================");
+        logger.info("====     NEXT APPLICATION START     ====");
+        logger.info("========================================");
+        
+        
 
 	}
 }

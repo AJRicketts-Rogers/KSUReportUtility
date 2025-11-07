@@ -87,7 +87,7 @@ public class KSUServiceLoader {
 		
 		Calendar yesterday = Calendar.getInstance();
 		Calendar tomrrow = Calendar.getInstance();
-		yesterday.add(Calendar.DATE, -1);
+		yesterday.add(Calendar.DATE, -50);
 		tomrrow.add(Calendar.DATE, 1);
 		Calendar startC = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss").getCalendar();
 		startC.setTimeInMillis(yesterday.getTimeInMillis());
@@ -102,11 +102,12 @@ public class KSUServiceLoader {
 		int counter = osmList.size();
 		logger.warn("Querying " + counter + " Completed Orders");
 		int tempCount = 0;
+		int totalCount = 0;
 	
 		logger.info("Filtering Zap and Amend Orders");
 		List<OsmOrderEntity> osmListNoZapOrAmend = filterOrders(osmList);
+
 		for (OsmOrderEntity osmEntity : osmListNoZapOrAmend) {
-			logger.debug("loading OSM Order " + osmEntity.getORDER_SEQ_ID());
 			OSMOrderTrackerEntity okEntity = createKSUOSMBean(osmEntity);
 			try {
 				int count = ksuOsmRepo.countByOsmId(okEntity.getOsmId());
@@ -114,6 +115,7 @@ public class KSUServiceLoader {
 				if (count == 0) {
 					ksuOsmRepo.save(okEntity);
 					tempCount++;
+					totalCount++;
 				}
 //				else {
 //					logger.info("Duplicate OSM ID " + okEntity.getOsmId());					
@@ -127,6 +129,7 @@ public class KSUServiceLoader {
 				tempCount = 0;
 			}
 		}
+		logger.debug(totalCount + " orders loaded.");
 		
 		ksuOsmRepo.flush();
 		Timestamp currenttime = new Timestamp(System.currentTimeMillis());
@@ -137,37 +140,6 @@ public class KSUServiceLoader {
 		
 		logger.info("Config Saved.." + config2);
 		
-		
-		
-//		for (OsmOrderEntity osmEntity : osmList) {
-//			logger.debug("loading OSM Order " + osmEntity.getORDER_SEQ_ID());
-//			OSMOrderTrackerEntity okEntity = createKSUOSMBean(osmEntity);
-//			if (osmEntity.getAmendMent() && !isZapOrder(osmEntity)) {
-//				try {
-//				// System.out.println("loading OSM ID " + okEntity.getOsmId());
-//				int count = ksuOsmRepo.countByOsmId(okEntity.getOsmId());
-//				
-//				if (count == 0) {
-////					logger.info("Saving order " + okEntity.getOsmId() + " to db.");
-//					ksuOsmRepo.save(okEntity);
-//					tempCount++;
-//				}
-//				// else
-//				// System.out.println("Duplicate OSM ID " + okEntity.getOsmId());
-//				} catch (Exception e) {
-//					logger.error("Exception in Saving ", e);
-//				}
-//			} 
-//			
-//			else {
-//				logger.debug("This is an Amend Order  >> " + osmEntity.getORDER_SEQ_ID());
-//			}
-//			
-//			if(tempCount >= 500) {
-//				ksuOsmRepo.flush();
-//				tempCount=0;
-//			}
-//		}
 	}
 	private OSMOrderTrackerEntity createKSUOSMBean(OsmOrderEntity osmEntity) {
 
@@ -186,6 +158,8 @@ public class KSUServiceLoader {
 	
 	private List<OsmOrderEntity> filterOrders(List<OsmOrderEntity> osmEntityList) {
 	    List<OsmOrderEntity> filteredEntities = new ArrayList<>();
+        int zapOrderCount = 0;
+        int amendOrderCount = 0;
 
 	    for (int i = 0; i < osmEntityList.size(); i += BATCH_SIZE) {
 	        List<OsmOrderEntity> batch = osmEntityList.subList(i, Math.min(i + BATCH_SIZE, osmEntityList.size()));
@@ -197,15 +171,11 @@ public class KSUServiceLoader {
 	                Function.identity()
 	            ));
 	        
-//	        logger.info("batchEntityMap = " + batchEntityMap);
-
 	        // Extract order IDs for the SOM query
 	        List<String> osmOrderIdsList = new ArrayList<>(batchEntityMap.keySet());
-//	        logger.info("osmOrderIdsList = " + osmOrderIdsList);
 
 	        // Query SOM for order types
 	        List<Object[]> batchResults = somRepo.findOrderTypesByOSM_ORDER_IDs(osmOrderIdsList);
-//	        logger.info("batchResults = " + batchResults);
 
 	        for (Object[] row : batchResults) {
 				
@@ -221,6 +191,7 @@ public class KSUServiceLoader {
 
 	            if (orderType != null && orderType.toLowerCase().contains("zap")) {
 	                logger.info("Order " + osmOrderId + " is a zap order, continuing...");
+	                zapOrderCount++;
 	                continue;
 	            }
 
@@ -231,11 +202,14 @@ public class KSUServiceLoader {
 	            }
 	            else {
 	            	logger.info("Order " + osmOrderId + " is an Amend Order");
+	            	amendOrderCount++;
 	            }
-	        }
+	        }    
 	    }
 
-//	    logger.info("filteredEntities = " + filteredEntities);
+	    logger.info("Number of zap orders = " + zapOrderCount);
+	    logger.info("Number of amend orders = " + amendOrderCount);
+
 	    return filteredEntities;
 	}
 
