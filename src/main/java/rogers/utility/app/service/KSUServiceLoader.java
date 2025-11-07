@@ -87,7 +87,7 @@ public class KSUServiceLoader {
 		
 		Calendar yesterday = Calendar.getInstance();
 		Calendar tomrrow = Calendar.getInstance();
-		yesterday.add(Calendar.DATE, -50);
+		yesterday.add(Calendar.DATE, -1);
 		tomrrow.add(Calendar.DATE, 1);
 		Calendar startC = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss").getCalendar();
 		startC.setTimeInMillis(yesterday.getTimeInMillis());
