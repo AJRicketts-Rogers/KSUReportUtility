@@ -12,6 +12,10 @@ import java.util.List;
 @Repository
 public interface KSURepository extends JpaRepository<KsuEntity, Integer> {
 
-    @Query(value = "SELECT u FROM KsuEntity u WHERE u.OSM_ORDER_ID = :osmId")
+
+	@Query(
+	    value = "SELECT /*+ full(ohoh) parallel(16) */ * FROM om_message_ksu_log WHERE osm_order_id = :osmId",
+	    nativeQuery = true
+	)
     List<KsuEntity> findKsuEntitiesByOSM_ORDER_ID(@Param("osmId") String osmId);
 }
