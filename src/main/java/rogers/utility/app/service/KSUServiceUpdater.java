@@ -1,6 +1,9 @@
 package rogers.utility.app.service;
 
+import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.List;
@@ -203,10 +206,21 @@ public class KSUServiceUpdater {
 					String responseXml =null;
 					try {
 						responseXml = wsCall.extractXMl(String.valueOf(oentity.getORDER_SEQ_ID()));
+//						String fileName = "ws_response.xml";
+//						
+//				        try (BufferedWriter writer = new BufferedWriter(new FileWriter(fileName))) {
+//				            writer.write(responseXml);
+//				            System.out.println("Successfully wrote to the file.");
+//				        } catch (IOException e) {
+//				            System.err.println("An error occurred: " + e.getMessage());
+//				            e.printStackTrace();
+//				        }
+				        
 					} catch (Exception e1) {
 						logger.error("Exception in  WS Call ",e1);
 						resposeBean.setErrorDescription(e1.getMessage());
 						logger.warn("Calling Second time with other url");
+						
 						try {
 							responseXml = wsCall.extractXMlSeconday(String.valueOf(oentity.getORDER_SEQ_ID()));
 							resposeBean.setErrorDescription(null);
@@ -217,21 +231,22 @@ public class KSUServiceUpdater {
 					}
 					if (responseXml != null && responseXml.length() > 0) {
 						HashMap<String, OrderItem> mapper = XmlUtility.readXPath(responseXml);
+						
 						if (mapper != null && !mapper.isEmpty()) {
 							OsmBean obean = BeanTransformer.convertEtoBean(oentity, ksuEntities);
+							
 							try {
 								resposeBean.setOsmBean(KSUFilterConfig.generateRenderBean(mapper, obean));
 							} catch (Exception e) {
-									if(e.getMessage()!=null && e.getMessage().equals("CONFIGISSUE-CFSLIST")) {
-										
+									
+									if (e.getMessage() != null && e.getMessage().equals("CONFIGISSUE-CFSLIST")) {									
 										logger.error("Config cfs list became null !",e);
 										this.config = getFilterConfig();
 										setFilterConfigBean();
 										logger.warn(" Setting  Config Again");										
-										
 									}
 							}
-							if(resposeBean.getOsmBean()==null) {
+							if(resposeBean.getOsmBean() == null) {
 									resposeBean.setOsmBean(KSUFilterConfig.generateRenderBean(mapper, obean));
 								
 							}

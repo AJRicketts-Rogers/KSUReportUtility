@@ -59,13 +59,16 @@ public interface OSMRepository extends JpaRepository<OsmEntity, Integer> {
     List<OsmEntity> findOrderNumber(String id,final Pageable pageable);
 
 
-    @Query(value = "SELECT oh FROM OsmEntity oh "+
-            "LEFT JOIN oh.ORDER_SOURCE_ID os LEFT JOIN oh.ORD_STATE_ID op "+
-            "LEFT JOIN oh.amendMent oa "+
-            "WHERE oh.ORDER_SEQ_ID = :id "+
-            " and os.ORDER_SOURCE_MNEMONIC ='COM_SalesOrderFulfillment'  and op.ID in (1,4,5,7,11) "+
-            " and oh.ddId in (select odd.DATA_DICTIONARY_ID  from DataDictionaryEntity odd where odd.DATA_DICTIONARY_ID=oh.ddId and odd.DATA_DICTIONARY_MNEMONIC='OrderType') "+
-            "order by oh.ordCreationDate DESC"
-    )
+	@Query(value = "SELECT oh FROM OsmEntity oh " +
+	        "LEFT JOIN oh.ORDER_SOURCE_ID os " +
+	        "LEFT JOIN oh.ORD_STATE_ID op " +
+	        "LEFT JOIN oh.amendMent oa " +
+	        "LEFT JOIN DataDictionaryEntity odd ON odd.DATA_DICTIONARY_ID = oh.ddId " +
+	        "WHERE oh.ORDER_SEQ_ID = :id " +
+	        "AND os.ORDER_SOURCE_MNEMONIC = 'COM_SalesOrderFulfillment' " +
+	        "AND op.ID IN (1,4,5,7,11) " +
+	        "AND odd.DATA_DICTIONARY_MNEMONIC = 'OrderType' " +
+	        "ORDER BY oh.ordCreationDate DESC"
+	)
     List<OsmEntity> findOsmId(Integer id);
 }

@@ -51,8 +51,13 @@ build maven to generate  jar file.
 
 copy the  jar file and  filterconfig.xml and applicationruntime.properties	  to same  folder.
 and execute
+
+*** If java is not in path, set java in path before running below commands (ex: export JAVA_HOME=/app/software/jdk1.8.0_202 + export PATH=$JAVA_HOME/bin:$PATH) ***
+
 1:  for  Running the application  for  OSM  Completed Order
 java -jar KSUReportUtility-1.jar LOADOSMONLY
+				OR
+java -jar KSUReportUtility-1.jar LOADOSMONLY --spring.config.location=file:/app/osm/shared/deployment/ksu_report_utilit/applicationruntime.properties
 
 2:  for  Running the application  for generating ksu report from Completed OSM Orders
 java -jar KSUReportUtility-1.jar LOADKSUREPORT
