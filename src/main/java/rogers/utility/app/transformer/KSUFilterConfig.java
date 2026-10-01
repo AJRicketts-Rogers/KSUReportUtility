@@ -27,7 +27,7 @@ public class KSUFilterConfig {
 		OSMRenderBean fbean = new OSMRenderBean();
 		String cbp = null;
 		fbean.setRaw(bean);
-		if (bean.getKsuList() != null)
+		if (bean.getKsuList() != null) {
 			for (KsuBean kbean : bean.getKsuList()) {
 				if (kbean.getCbp() != null && kbean.getOrderId() != null) {
 					fbean.setCbp(kbean.getCbp());
@@ -35,6 +35,7 @@ public class KSUFilterConfig {
 					break;
 				}
 			}
+		}
 		fbean.setOrderAction(bean.getOrderAction());
 		fbean.setStatus(bean.getStatus());
 		if (bean.getCompletedDateTime() != null && !bean.getCompletedDateTime().contains("9999"))
@@ -107,7 +108,8 @@ public class KSUFilterConfig {
 		 * =generateConfigService(config,mapper,serviceName,osm); if(tsbean!=null)
 		 * serviceList.add(tsbean); }
 		 */
-		logger.debug("serviceList  >> " + serviceList);
+		logger.debug("\n");
+		logger.debug("serviceList  >> " + serviceList + "\n");
 
 		return serviceList;
 	}
@@ -148,7 +150,7 @@ public class KSUFilterConfig {
 			mbean.setStatus("FAILED");
 			mbeans.add(mbean);
 		}
-
+		
 		return mbeans;
 	}
 

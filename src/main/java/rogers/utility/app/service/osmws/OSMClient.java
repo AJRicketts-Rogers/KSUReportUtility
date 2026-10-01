@@ -80,7 +80,7 @@ public class OSMClient {
 		return resp;
 	}
 
-	public String extractXMlSeconday(String osmId)  throws Exception {
+	public String extractXMlSecondary(String osmId)  throws Exception {
 		String resp = null;
 
 

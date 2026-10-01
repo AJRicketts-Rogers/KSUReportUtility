@@ -108,10 +108,19 @@ public class KSUServiceUpdater {
 
 		for (OSMOrderTrackerEntity osmOrderTrackerEntity : osmKsuList) {
 			String osmId = "" + osmOrderTrackerEntity.getOsmId();
-
+			logger.debug("\n");
 			logger.debug("Calling Update for " + osmId);
+			
 			try {
+				long startTime = System.currentTimeMillis();
 				OSMResponseBean result = generateResponseBeanStore(osmId);
+				long endTime = System.currentTimeMillis();
+		        long durationMillis = endTime - startTime;
+
+		        long seconds = (durationMillis / 1000) % 60;
+		        long minutes = (durationMillis / 1000) / 60;
+
+		        logger.info("generateResponseBeanStore() ran for " + minutes + " minutes and " + seconds + " seconds.");
 			
 				if (result.getOsmBean() != null) {
 
@@ -206,8 +215,9 @@ public class KSUServiceUpdater {
 					String responseXml =null;
 					try {
 						responseXml = wsCall.extractXMl(String.valueOf(oentity.getORDER_SEQ_ID()));
-//						String fileName = "ws_response.xml";
-//						
+						logger.info("EXTRACTED XML");
+
+//						String fileName = "ws2_response_dev1.xml";
 //				        try (BufferedWriter writer = new BufferedWriter(new FileWriter(fileName))) {
 //				            writer.write(responseXml);
 //				            System.out.println("Successfully wrote to the file.");
@@ -222,7 +232,7 @@ public class KSUServiceUpdater {
 						logger.warn("Calling Second time with other url");
 						
 						try {
-							responseXml = wsCall.extractXMlSeconday(String.valueOf(oentity.getORDER_SEQ_ID()));
+							responseXml = wsCall.extractXMlSecondary(String.valueOf(oentity.getORDER_SEQ_ID()));
 							resposeBean.setErrorDescription(null);
 						} catch (Exception e2) {
 							logger.error("Exception in  WS Call Secondary",e2);
@@ -230,7 +240,8 @@ public class KSUServiceUpdater {
 						}
 					}
 					if (responseXml != null && responseXml.length() > 0) {
-						HashMap<String, OrderItem> mapper = XmlUtility.readXPath(responseXml);
+//						HashMap<String, OrderItem> mapper = XmlUtility.readXPath(responseXml);
+						HashMap<String, OrderItem> mapper = XmlUtility.readXPathNew(responseXml);
 						
 						if (mapper != null && !mapper.isEmpty()) {
 							OsmBean obean = BeanTransformer.convertEtoBean(oentity, ksuEntities);
@@ -243,7 +254,7 @@ public class KSUServiceUpdater {
 										logger.error("Config cfs list became null !",e);
 										this.config = getFilterConfig();
 										setFilterConfigBean();
-										logger.warn(" Setting  Config Again");										
+										logger.warn("Setting  Config Again");										
 									}
 							}
 							if(resposeBean.getOsmBean() == null) {
@@ -252,7 +263,7 @@ public class KSUServiceUpdater {
 							}
 							resposeBean.setOsmRawBean(obean);
 						} else {
-
+							logger.error("MAP IS EMPTY");
 							resposeBean.setErrorDescription("EMPTYXML");
 						}
 					} else {

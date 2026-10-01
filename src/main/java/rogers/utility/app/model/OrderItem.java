@@ -15,6 +15,7 @@ public class OrderItem {
     private String id;
     private String unitofOrder;
     private List<OrderItem> childList;
+    private List<String> childIdList;
     public OrderItem(){
 
     }
@@ -54,6 +55,14 @@ public class OrderItem {
 
     public void setChildList(List<OrderItem> childList) {
         this.childList = childList;
+    }
+    
+    public List<String> getChildIdList() {
+    	return childIdList;
+    }
+    
+    public void setChildIdList(List<String> childIdList) {
+    	this.childIdList = childIdList;
     }
 
     @Override
